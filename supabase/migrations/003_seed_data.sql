@@ -167,3 +167,15 @@ insert into products (id, category_id, name, brand, price, original_price, image
  null,false,true,280)
 
 on conflict (id) do nothing;
+
+insert into reviews (product_id, author, rating, comment) values
+('p26', 'Nguyễn Thị Lan', 5, 'Sản phẩm rất tốt, dùng được 2 tuần thấy da mịn hơn hẳn. Sẽ mua lại!'),
+('p26', 'Trần Minh Hoa', 4, 'Chất lượng ổn, mùi thơm dễ chịu. Giao hàng nhanh.'),
+('p26', 'Lê Thu Hương', 5, 'Mình dùng cho da dầu, thấy kiểm soát dầu khá tốt. Recommend!'),
+('p1',  'Phạm Thị Mai', 5, 'Serum vitamin C này thật sự hiệu quả, da sáng lên rõ rệt sau 1 tháng.'),
+('p1',  'Đỗ Văn Nam', 4, 'Sản phẩm tốt, nhưng giá hơi cao. Tuy nhiên chất lượng xứng đáng.'),
+('p2',  'Vũ Thị Bích', 5, 'Kem dưỡng ẩm tuyệt vời, da mềm mịn cả ngày. Rất thích!'),
+('p3',  'Hoàng Thị Yến', 4, 'Tẩy trang sạch, không gây kích ứng da nhạy cảm của mình.'),
+('p4',  'Ngô Thị Hà', 5, 'Chống nắng nhẹ, không bết dính. Dùng hàng ngày rất tiện.'),
+('p5',  'Bùi Thị Thảo', 4, 'Toner cân bằng da tốt, lỗ chân lông se lại sau vài tuần dùng.')
+on conflict do nothing;

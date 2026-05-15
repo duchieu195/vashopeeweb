@@ -17,7 +17,12 @@ function Stars({ rating }: { rating: number }) {
 }
 
 export default function ReviewList({ reviews }: Props) {
-  if (reviews.length === 0) return null;
+  if (reviews.length === 0) return (
+    <div>
+      <h3 className="font-semibold text-gray-800 text-lg mb-4">Đánh Giá Sản Phẩm</h3>
+      <p className="text-sm text-gray-400">Chưa có đánh giá nào cho sản phẩm này.</p>
+    </div>
+  );
 
   return (
     <div>
