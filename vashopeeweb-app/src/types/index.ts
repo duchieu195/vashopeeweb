@@ -29,9 +29,40 @@ export interface Product {
   ingredients?: string;
   isNew?: boolean;
   isBestSeller?: boolean;
+  hasVariants?: boolean;
+}
+
+export interface ProductOptionValue {
+  id: string;
+  groupId: string;
+  value: string;
+  displayOrder: number;
+}
+
+export interface ProductOptionGroup {
+  id: string;
+  productId: string;
+  name: string;
+  displayOrder: number;
+  values: ProductOptionValue[];
+}
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  sku?: string;
+  price: number;
+  originalPrice?: number;
+  stockQuantity: number;
+  images: string[];
+  isActive: boolean;
+  optionValueIds: string[];
 }
 
 export interface CartItem {
   product: Product;
+  variantId?: string;
+  variantLabel?: string;
+  variantPrice?: number;
   quantity: number;
 }

@@ -101,7 +101,9 @@ export default function CheckoutPage() {
           product_name: item.product.name,
           product_image: item.product.images[0] ?? null,
           quantity: item.quantity,
-          price_at_purchase: item.product.price,
+          price_at_purchase: item.variantPrice ?? item.product.price,
+          variant_id: item.variantId ?? null,
+          variant_label: item.variantLabel ?? null,
         }))
       );
     }
@@ -252,14 +254,17 @@ export default function CheckoutPage() {
           <h2 className="font-semibold text-gray-800 mb-4">Đơn Hàng ({items.length} sản phẩm)</h2>
           <div className="space-y-3 mb-4">
             {items.map((item) => (
-              <div key={item.product.id} className="flex gap-3">
+              <div key={item.variantId ? `${item.product.id}__${item.variantId}` : item.product.id} className="flex gap-3">
                 <img src={item.product.images[0]} alt={item.product.name} loading="lazy" className="w-14 h-14 object-cover rounded flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-800 line-clamp-2 leading-tight">{item.product.name}</p>
+                  {item.variantLabel && (
+                    <p className="text-xs text-gray-400 mt-0.5">{item.variantLabel}</p>
+                  )}
                   <p className="text-xs text-gray-400 mt-0.5">x{item.quantity}</p>
                 </div>
                 <span className="text-sm font-medium text-gray-800 flex-shrink-0">
-                  {(item.product.price * item.quantity).toLocaleString('vi-VN')}₫
+                  {((item.variantPrice ?? item.product.price) * item.quantity).toLocaleString('vi-VN')}₫
                 </span>
               </div>
             ))}

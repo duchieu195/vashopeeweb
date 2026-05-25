@@ -1,20 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProduct } from '../hooks/useProduct';
+import { useProductVariants } from '../hooks/useProductVariants';
 import { supabase } from '../lib/supabase';
-import type { Review } from '../types';
+import type { Review, ProductVariant } from '../types';
 import ImageGallery from '../components/ImageGallery';
 import QuantitySelector from '../components/QuantitySelector';
 import ReviewList from '../components/ReviewList';
+import VariantSelector from '../components/VariantSelector';
 import { useCart } from '../store/cartStore';
+
+function findMatchingVariant(
+  variants: ProductVariant[],
+  selectedIds: string[]
+): ProductVariant | undefined {
+  return variants.find(
+    (v) =>
+      v.isActive &&
+      v.optionValueIds.length === selectedIds.length &&
+      selectedIds.every((id) => v.optionValueIds.includes(id))
+  );
+}
+
+function computeVariantLabel(
+  variant: ProductVariant,
+  groups: ReturnType<typeof useProductVariants>['groups']
+): string {
+  return [...groups]
+    .sort((a, b) => a.displayOrder - b.displayOrder)
+    .map((g) => {
+      const val = g.values.find((v) => variant.optionValueIds.includes(v.id));
+      return val?.value ?? '';
+    })
+    .filter(Boolean)
+    .join(' / ');
+}
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [selected, setSelected] = useState<Record<string, string>>({});
   const { addItem, openCart } = useCart();
   const { product, loading, error } = useProduct(id);
+  const { groups, variants } = useProductVariants(id, !!product?.hasVariants);
 
   useEffect(() => {
     if (!id) return;
@@ -36,6 +66,52 @@ export default function ProductDetailPage() {
         );
       });
   }, [id]);
+
+  const selectedIds = useMemo(() => Object.values(selected), [selected]);
+  const allGroupsSelected = groups.length > 0 && groups.every((g) => selected[g.id]);
+  const selectedVariant = allGroupsSelected ? findMatchingVariant(variants, selectedIds) : undefined;
+
+  const displayPrice = selectedVariant?.price ?? product?.price ?? 0;
+  const displayOrigPrice = selectedVariant?.originalPrice ?? product?.originalPrice;
+  const displayImages =
+    selectedVariant && selectedVariant.images.length > 0
+      ? selectedVariant.images
+      : product?.images ?? [];
+  const displayStock = selectedVariant?.stockQuantity ?? 0;
+
+  const canAddToCart = product?.hasVariants
+    ? allGroupsSelected && !!selectedVariant && displayStock > 0
+    : true;
+
+  const addToCartLabel = () => {
+    if (added) return '✓ Đã thêm vào giỏ hàng!';
+    if (product?.hasVariants && !allGroupsSelected) return 'Vui lòng chọn phân loại';
+    if (product?.hasVariants && allGroupsSelected && (!selectedVariant || displayStock === 0)) return 'Hết hàng';
+    return 'Thêm Vào Giỏ Hàng';
+  };
+
+  const handleSelect = (groupId: string, valueId: string) => {
+    setSelected((prev) => ({ ...prev, [groupId]: valueId }));
+  };
+
+  const handleAddToCart = () => {
+    if (!product || !canAddToCart) return;
+
+    addItem(
+      product,
+      quantity,
+      selectedVariant
+        ? {
+            variantId: selectedVariant.id,
+            variantLabel: computeVariantLabel(selectedVariant, groups),
+            variantPrice: selectedVariant.price,
+          }
+        : undefined
+    );
+    setAdded(true);
+    openCart();
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   if (loading) {
     return (
@@ -67,16 +143,9 @@ export default function ProductDetailPage() {
     );
   }
 
-  const discount = product.originalPrice
-    ? Math.round((1 - product.price / product.originalPrice) * 100)
+  const discount = displayOrigPrice
+    ? Math.round((1 - displayPrice / displayOrigPrice) * 100)
     : 0;
-
-  const handleAddToCart = () => {
-    addItem(product, quantity);
-    setAdded(true);
-    openCart();
-    setTimeout(() => setAdded(false), 2000);
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-4">
@@ -90,7 +159,7 @@ export default function ProductDetailPage() {
 
       <div className="bg-white rounded-sm p-4 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <ImageGallery images={product.images} productName={product.name} />
+          <ImageGallery images={displayImages} productName={product.name} />
 
           <div>
             <p className="text-sm text-gray-400 mb-1">{product.brand}</p>
@@ -112,12 +181,12 @@ export default function ProductDetailPage() {
             <div className="bg-gray-50 rounded-lg p-4 mb-5">
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl font-bold text-primary">
-                  {product.price.toLocaleString('vi-VN')}₫
+                  {displayPrice.toLocaleString('vi-VN')}₫
                 </span>
-                {product.originalPrice && (
+                {displayOrigPrice && (
                   <>
                     <span className="text-gray-400 line-through text-lg">
-                      {product.originalPrice.toLocaleString('vi-VN')}₫
+                      {displayOrigPrice.toLocaleString('vi-VN')}₫
                     </span>
                     <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded">
                       -{discount}%
@@ -127,6 +196,17 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
+            {product.hasVariants && groups.length > 0 && (
+              <div className="mb-5">
+                <VariantSelector
+                  groups={groups}
+                  variants={variants}
+                  selected={selected}
+                  onSelect={handleSelect}
+                />
+              </div>
+            )}
+
             <div className="flex items-center gap-4 mb-5">
               <span className="text-sm text-gray-600">Số lượng:</span>
               <QuantitySelector quantity={quantity} onChange={setQuantity} />
@@ -134,9 +214,16 @@ export default function ProductDetailPage() {
 
             <button
               onClick={handleAddToCart}
-              className={`w-full py-3 rounded font-semibold text-white transition-all ${added ? 'bg-green-500' : 'bg-primary hover:bg-primary-dark'}`}
+              disabled={!canAddToCart}
+              className={`w-full py-3 rounded font-semibold text-white transition-all ${
+                added
+                  ? 'bg-green-500'
+                  : canAddToCart
+                  ? 'bg-primary hover:bg-primary-dark'
+                  : 'bg-gray-300 cursor-not-allowed'
+              }`}
             >
-              {added ? '✓ Đã thêm vào giỏ hàng!' : 'Thêm Vào Giỏ Hàng'}
+              {addToCartLabel()}
             </button>
 
             <div className="mt-6 border-t pt-4">

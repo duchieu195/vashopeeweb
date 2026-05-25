@@ -31,7 +31,18 @@ export default function OrderShow() {
 
   const itemColumns = [
     { title: 'Ảnh', dataIndex: 'product_image', render: (v: string) => v ? <Image src={v} width={40} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} /> : '—' },
-    { title: 'Sản phẩm', dataIndex: 'product_name' },
+    {
+      title: 'Sản phẩm',
+      dataIndex: 'product_name',
+      render: (name: string, r: Record<string, unknown>) => (
+        <div>
+          <div>{name}</div>
+          {r.variant_label && (
+            <div style={{ fontSize: 12, color: '#999' }}>{r.variant_label as string}</div>
+          )}
+        </div>
+      ),
+    },
     { title: 'Số lượng', dataIndex: 'quantity' },
     { title: 'Đơn giá', dataIndex: 'price_at_purchase', render: (v: number) => `${v.toLocaleString('vi-VN')}₫` },
     { title: 'Thành tiền', render: (_: unknown, r: Record<string, unknown>) => `${((r.quantity as number) * (r.price_at_purchase as number)).toLocaleString('vi-VN')}₫` },

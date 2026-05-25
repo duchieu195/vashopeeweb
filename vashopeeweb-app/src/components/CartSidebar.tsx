@@ -45,7 +45,10 @@ export default function CartSidebar() {
           ) : (
             <div className="space-y-3">
               {items.map((item) => (
-                <CartItemComponent key={item.product.id} item={item} />
+                <CartItemComponent
+                  key={item.variantId ? `${item.product.id}__${item.variantId}` : item.product.id}
+                  item={item}
+                />
               ))}
             </div>
           )}

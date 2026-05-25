@@ -33,6 +33,7 @@ export default function ProductCard({ product }: Props) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (product.hasVariants) return; // navigate to detail page via Link
     addItem(product);
     openCart();
   };
@@ -69,9 +70,9 @@ export default function ProductCard({ product }: Props) {
 
         <div className="mt-2 flex items-center gap-1.5">
           <span className="text-primary font-semibold text-sm">
-            {product.price.toLocaleString('vi-VN')}₫
+            {product.hasVariants ? 'Từ ' : ''}{product.price.toLocaleString('vi-VN')}₫
           </span>
-          {product.originalPrice && (
+          {!product.hasVariants && product.originalPrice && (
             <span className="text-gray-400 text-xs line-through">
               {product.originalPrice.toLocaleString('vi-VN')}₫
             </span>
@@ -86,12 +87,12 @@ export default function ProductCard({ product }: Props) {
           <button
             onClick={handleAddToCart}
             className="flex items-center gap-1 bg-primary hover:bg-primary-dark text-white text-xs font-medium px-2 py-1 rounded transition-colors"
-            title="Thêm vào giỏ hàng"
+            title={product.hasVariants ? 'Xem chi tiết' : 'Thêm vào giỏ hàng'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Thêm
+            {product.hasVariants ? 'Chọn' : 'Thêm'}
           </button>
         </div>
       </div>

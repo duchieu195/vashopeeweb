@@ -43,6 +43,7 @@ export function useProduct(id: string | undefined) {
           ingredients: data.ingredients ?? undefined,
           isNew: data.is_new,
           isBestSeller: data.is_best_seller,
+          hasVariants: data.has_variants ?? false,
         });
       }
       setLoading(false);
