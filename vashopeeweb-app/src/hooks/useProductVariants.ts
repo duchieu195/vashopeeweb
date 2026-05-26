@@ -14,7 +14,7 @@ export function useProductVariants(productId: string | undefined, enabled: boole
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!productId || !enabled) {
+    if (!productId) {
       setGroups([]);
       setVariants([]);
       return;
@@ -22,7 +22,7 @@ export function useProductVariants(productId: string | undefined, enabled: boole
 
     let cancelled = false;
 
-    async function fetch() {
+    async function load() {
       setLoading(true);
 
       const [groupsRes, variantsRes] = await Promise.all([
@@ -33,9 +33,8 @@ export function useProductVariants(productId: string | undefined, enabled: boole
           .order('display_order'),
         supabase
           .from('product_variants')
-          .select('*, product_variant_options(option_value_id)')
-          .eq('product_id', productId)
-          .eq('is_active', true),
+          .select('id, product_id, sku, price, original_price, stock_quantity, images, is_active, product_variant_options(option_value_id)')
+          .eq('product_id', productId),
       ]);
 
       if (cancelled) return;
@@ -78,9 +77,10 @@ export function useProductVariants(productId: string | undefined, enabled: boole
       setLoading(false);
     }
 
-    fetch();
+    load();
     return () => { cancelled = true; };
-  }, [productId, enabled]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId]);
 
   return { groups, variants, loading };
 }

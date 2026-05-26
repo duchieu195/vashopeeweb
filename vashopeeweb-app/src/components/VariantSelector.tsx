@@ -7,7 +7,7 @@ interface Props {
   onSelect: (groupId: string, valueId: string) => void;
 }
 
-function isValueOutOfStock(
+function isUnavailable(
   groupId: string,
   valueId: string,
   selected: Record<string, string>,
@@ -17,19 +17,20 @@ function isValueOutOfStock(
   const hypothetical = { ...selected, [groupId]: valueId };
   const allGroupIds = groups.map((g) => g.id);
   const fullySelected = allGroupIds.every((id) => hypothetical[id]);
+
+  // Chỉ disable khi đã chọn đủ tất cả nhóm và tổ hợp đó không tồn tại
   if (!fullySelected) return false;
 
-  const match = variants.find(
-    (v) =>
-      v.isActive &&
-      allGroupIds.every((gId) => {
-        const group = groups.find((g) => g.id === gId);
-        const valId = hypothetical[gId];
-        return group?.values.some((val) => val.id === valId && v.optionValueIds.includes(val.id));
-      })
+  const match = variants.find((v) =>
+    v.isActive &&
+    allGroupIds.every((gId) => {
+      const group = groups.find((g) => g.id === gId);
+      const valId = hypothetical[gId];
+      return group?.values.some((val) => val.id === valId && v.optionValueIds.includes(val.id));
+    })
   );
 
-  return !match || match.stockQuantity === 0;
+  return !match;
 }
 
 export default function VariantSelector({ groups, variants, selected, onSelect }: Props) {
@@ -41,18 +42,18 @@ export default function VariantSelector({ groups, variants, selected, onSelect }
           <div className="flex flex-wrap gap-2">
             {group.values.map((val) => {
               const isSelected = selected[group.id] === val.id;
-              const outOfStock = isValueOutOfStock(group.id, val.id, selected, groups, variants);
+              const unavailable = isUnavailable(group.id, val.id, selected, groups, variants);
 
               return (
                 <button
                   key={val.id}
-                  onClick={() => !outOfStock && onSelect(group.id, val.id)}
-                  disabled={outOfStock}
+                  onClick={() => !unavailable && onSelect(group.id, val.id)}
+                  disabled={unavailable}
                   className={[
                     'px-3 py-1.5 rounded border text-sm transition-colors',
                     isSelected
                       ? 'border-primary bg-primary text-white'
-                      : outOfStock
+                      : unavailable
                       ? 'border-gray-200 bg-gray-50 text-gray-300 line-through cursor-not-allowed'
                       : 'border-gray-300 bg-white text-gray-700 hover:border-primary hover:text-primary',
                   ].join(' ')}

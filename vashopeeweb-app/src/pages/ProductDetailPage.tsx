@@ -80,13 +80,12 @@ export default function ProductDetailPage() {
   const displayStock = selectedVariant?.stockQuantity ?? 0;
 
   const canAddToCart = product?.hasVariants
-    ? allGroupsSelected && !!selectedVariant && displayStock > 0
+    ? allGroupsSelected && !!selectedVariant
     : true;
 
   const addToCartLabel = () => {
     if (added) return '✓ Đã thêm vào giỏ hàng!';
     if (product?.hasVariants && !allGroupsSelected) return 'Vui lòng chọn phân loại';
-    if (product?.hasVariants && allGroupsSelected && (!selectedVariant || displayStock === 0)) return 'Hết hàng';
     return 'Thêm Vào Giỏ Hàng';
   };
 
