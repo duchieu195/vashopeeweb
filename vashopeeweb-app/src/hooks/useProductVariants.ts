@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { ProductOptionGroup, ProductVariant } from '../types';
 
@@ -12,6 +12,7 @@ export function useProductVariants(productId: string | undefined, enabled: boole
   const [groups, setGroups] = useState<ProductOptionGroup[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(false);
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
     if (!productId) {
@@ -20,7 +21,7 @@ export function useProductVariants(productId: string | undefined, enabled: boole
       return;
     }
 
-    let cancelled = false;
+    cancelledRef.current = false;
 
     async function load() {
       setLoading(true);
@@ -37,7 +38,7 @@ export function useProductVariants(productId: string | undefined, enabled: boole
           .eq('product_id', productId),
       ]);
 
-      if (cancelled) return;
+      if (cancelledRef.current) return;
 
       if (groupsRes.data) {
         const mapped: ProductOptionGroup[] = groupsRes.data.map((g) => ({
@@ -78,8 +79,7 @@ export function useProductVariants(productId: string | undefined, enabled: boole
     }
 
     load();
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { cancelledRef.current = true; };
   }, [productId]);
 
   return { groups, variants, loading };
