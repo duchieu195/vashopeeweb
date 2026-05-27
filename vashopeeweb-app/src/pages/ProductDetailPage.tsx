@@ -77,8 +77,6 @@ export default function ProductDetailPage() {
     selectedVariant && selectedVariant.images.length > 0
       ? selectedVariant.images
       : product?.images ?? [];
-  const displayStock = selectedVariant?.stockQuantity ?? 0;
-
   const canAddToCart = product?.hasVariants
     ? allGroupsSelected && !!selectedVariant
     : true;

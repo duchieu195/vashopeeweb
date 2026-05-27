@@ -8,7 +8,7 @@ interface UseProductVariantsResult {
   loading: boolean;
 }
 
-export function useProductVariants(productId: string | undefined, enabled: boolean): UseProductVariantsResult {
+export function useProductVariants(productId: string | undefined, _enabled?: boolean): UseProductVariantsResult {
   const [groups, setGroups] = useState<ProductOptionGroup[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(false);
