@@ -3,7 +3,6 @@ import {
   Button, InputNumber, Input, Switch, Table, Typography, Upload, Image, Space, Popconfirm, Alert,
 } from 'antd';
 import { PlusOutlined, DeleteOutlined, UploadOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd';
 import { supabaseClient } from '../../lib/supabase';
 import type { OptionGroupDraft } from './OptionGroupBuilder';
 

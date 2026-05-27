@@ -37,7 +37,7 @@ export default function OrderShow() {
       render: (name: string, r: Record<string, unknown>) => (
         <div>
           <div>{name}</div>
-          {r.variant_label && (
+          {!!r.variant_label && (
             <div style={{ fontSize: 12, color: '#999' }}>{r.variant_label as string}</div>
           )}
         </div>
