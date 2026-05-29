@@ -12,7 +12,6 @@ const TIMEOUT_MS = 15 * 60 * 1000;
 interface ShippingInfo {
   name: string;
   phone: string;
-  email: string;
   address: string;
   notes: string;
 }
@@ -39,9 +38,9 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<ShippingInfo>(() => {
     try {
       const saved = localStorage.getItem(SHIPPING_KEY);
-      return saved ? JSON.parse(saved) : { name: '', phone: '', email: '', address: '', notes: '' };
+      return saved ? JSON.parse(saved) : { name: '', phone: '', address: '', notes: '' };
     } catch {
-      return { name: '', phone: '', email: '', address: '', notes: '' };
+      return { name: '', phone: '', address: '', notes: '' };
     }
   });
 
@@ -63,7 +62,6 @@ export default function CheckoutPage() {
     const errs: Partial<ShippingInfo> = {};
     if (!form.name.trim()) errs.name = 'Vui lòng nhập họ tên';
     if (!form.phone.trim()) errs.phone = 'Vui lòng nhập số điện thoại';
-    if (!form.email.trim()) errs.email = 'Vui lòng nhập email';
     if (!form.address.trim()) errs.address = 'Vui lòng nhập địa chỉ';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -79,7 +77,6 @@ export default function CheckoutPage() {
       payment_code: code,
       customer_name: form.name,
       customer_phone: form.phone,
-      customer_email: form.email,
       shipping_address: form.address,
       notes: form.notes || null,
       total_amount: total,
@@ -199,7 +196,6 @@ export default function CheckoutPage() {
                 {([
                   { key: 'name', label: 'Họ và tên', type: 'text', placeholder: 'Nguyễn Văn A' },
                   { key: 'phone', label: 'Số điện thoại', type: 'tel', placeholder: '0909 123 456' },
-                  { key: 'email', label: 'Email', type: 'email', placeholder: 'email@example.com' },
                   { key: 'address', label: 'Địa chỉ giao hàng', type: 'text', placeholder: '123 Đường ABC, Quận 1, TP.HCM' },
                 ] as const).map(({ key, label, type, placeholder }) => (
                   <div key={key}>
