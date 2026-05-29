@@ -1,5 +1,7 @@
 import { List, useTable } from '@refinedev/antd';
-import { Table, Tag, Select } from 'antd';
+import { useDelete } from '@refinedev/core';
+import { Table, Tag, Select, Popconfirm, Button } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
@@ -14,6 +16,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function OrderList() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const { mutate: deleteOrder } = useDelete();
 
   const { tableProps } = useTable({
     resource: 'orders',
@@ -54,6 +57,21 @@ export default function OrderList() {
           title="Ngày tạo"
           dataIndex="created_at"
           render={(v: string) => v?.slice(0, 16).replace('T', ' ')}
+        />
+        <Table.Column
+          title=""
+          render={(_: unknown, record: { id: string; payment_code: string }) => (
+            <Popconfirm
+              title={`Xoá đơn hàng ${record.payment_code}?`}
+              description="Hành động này không thể hoàn tác."
+              okText="Xoá"
+              cancelText="Huỷ"
+              okButtonProps={{ danger: true }}
+              onConfirm={() => deleteOrder({ resource: 'orders', id: record.id })}
+            >
+              <Button danger icon={<DeleteOutlined />} size="small" />
+            </Popconfirm>
+          )}
         />
       </Table>
     </List>

@@ -1,7 +1,9 @@
 import { Show } from '@refinedev/antd';
-import { useShow, useUpdate } from '@refinedev/core';
-import { Descriptions, Tag, Select, Table, Image, Divider, Spin, Alert } from 'antd';
+import { useShow, useUpdate, useDelete } from '@refinedev/core';
+import { Descriptions, Tag, Select, Table, Image, Divider, Spin, Alert, Popconfirm, Button } from 'antd';
+import { DeleteOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabaseClient } from '../../lib/supabase';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -12,6 +14,8 @@ const STATUS_LABEL: Record<string, string> = {
 export default function OrderShow() {
   const { query } = useShow({ resource: 'orders' });
   const { mutate: updateOrder } = useUpdate();
+  const { mutate: deleteOrder } = useDelete();
+  const navigate = useNavigate();
   const order = query?.data?.data;
   const isLoading = query?.isPending ?? false;
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
@@ -97,7 +101,32 @@ export default function OrderShow() {
   };
 
   return (
-    <Show isLoading={isLoading}>
+    <Show
+      isLoading={isLoading}
+      headerButtons={({ defaultButtons }) => (
+        <>
+          {defaultButtons}
+          <Popconfirm
+            title="Xoá đơn hàng này?"
+            description="Hành động này không thể hoàn tác."
+            okText="Xoá"
+            cancelText="Huỷ"
+            okButtonProps={{ danger: true }}
+            onConfirm={() =>
+              order?.id &&
+              deleteOrder(
+                { resource: 'orders', id: order.id as string },
+                { onSuccess: () => navigate('/orders') },
+              )
+            }
+          >
+            <Button danger icon={<DeleteOutlined />} disabled={!order?.id}>
+              Xoá đơn hàng
+            </Button>
+          </Popconfirm>
+        </>
+      )}
+    >
       {renderContent()}
     </Show>
   );
