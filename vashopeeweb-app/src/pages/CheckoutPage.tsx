@@ -126,7 +126,7 @@ export default function CheckoutPage() {
         .eq('payment_code', code)
         .single();
 
-      if (data?.status === 'paid') {
+      if (data?.status === 'paid' || data?.status === 'confirmed') {
         stopAll();
         clearCart();
         setStep('success');
@@ -162,9 +162,9 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <div className="text-6xl mb-4">🎉</div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Đặt Hàng Thành Công!</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">Thanh toán đã được xác nhận!</h1>
         <p className="text-gray-500 mb-2">Mã đơn hàng: <strong className="text-gray-800">{orderCode}</strong></p>
-        <p className="text-gray-500 text-sm mb-6">Chúng tôi sẽ liên hệ xác nhận và giao hàng sớm nhất.</p>
+        <p className="text-gray-500 text-sm mb-6">Chúng tôi đã nhận tiền và đơn hàng đang được xử lý để giao sớm nhất.</p>
         <Link to="/" className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded font-semibold transition-colors">
           Tiếp Tục Mua Sắm
         </Link>

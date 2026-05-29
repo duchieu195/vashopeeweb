@@ -6,14 +6,17 @@ import { useNavigate } from 'react-router-dom';
 
 export default function ProductList() {
   const [search, setSearch] = useState('');
+  const [showBroken, setShowBroken] = useState(false);
   const navigate = useNavigate();
+
+  const filters = [];
+  if (search) filters.push({ field: 'name', operator: 'contains' as const, value: search });
+  if (showBroken) filters.push({ field: 'name', operator: 'contains' as const, value: '_' });
 
   const { tableProps } = useTable({
     resource: 'products',
     sorters: { initial: [{ field: 'created_at', order: 'desc' }] },
-    filters: {
-      permanent: search ? [{ field: 'name', operator: 'contains', value: search }] : [],
-    },
+    filters: { permanent: filters },
     meta: { select: '*, categories(name)' },
   });
 
@@ -23,14 +26,23 @@ export default function ProductList() {
           Thêm sản phẩm
         </Button>
       }>
-      <Input
-        prefix={<SearchOutlined />}
-        placeholder="Tìm theo tên sản phẩm..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: 16, maxWidth: 320 }}
-        allowClear
-      />
+      <Space style={{ marginBottom: 16 }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Tìm theo tên sản phẩm..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ maxWidth: 320 }}
+          allowClear
+        />
+        <Button
+          type={showBroken ? 'primary' : 'default'}
+          danger={showBroken}
+          onClick={() => setShowBroken((v) => !v)}
+        >
+          Tên bị lỗi (_)
+        </Button>
+      </Space>
       <Table {...(tableProps as object)} rowKey="id" scroll={{ x: 900 }}>
         <Table.Column
           title="Ảnh"
@@ -41,6 +53,7 @@ export default function ProductList() {
           )}
         />
         <Table.Column title="Tên sản phẩm" dataIndex="name" ellipsis />
+        <Table.Column title="Mô tả" dataIndex="description" ellipsis width={220} />
         <Table.Column title="Thương hiệu" dataIndex="brand" width={120} />
         <Table.Column
           title="Danh mục"
