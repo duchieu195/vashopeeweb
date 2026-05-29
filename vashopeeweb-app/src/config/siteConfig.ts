@@ -1,4 +1,9 @@
 export const siteConfig = {
+  bank: {
+    id: 'vietcombank',
+    accountNo: '1033243418',
+    accountName: 'NGUYEN THI VAN ANH',
+  },
   name: 'VABeauty',
   description: 'Shop mỹ phẩm chính hãng nhỏ xinh từ trải nghiệm thực tế và đam mê Skincare của VA',
   address: 'CT2B, KĐT Nghĩa Đô, phường Nghĩa Đô, Tp Hà Nội',

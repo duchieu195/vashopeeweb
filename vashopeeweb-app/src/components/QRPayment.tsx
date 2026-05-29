@@ -1,25 +1,14 @@
 import { useState } from 'react';
+import { siteConfig } from '../config/siteConfig';
 
 interface Props {
   orderCode: string;
   amount: number;
-  bankId?: string;
-  accountNo?: string;
-  accountName?: string;
 }
 
-const BANK_ID = 'vietcombank';
-const ACCOUNT_NO = '1017588888';
-const ACCOUNT_NAME = 'NGUYEN VAN A';
-
-export default function QRPayment({
-  orderCode,
-  amount,
-  bankId = BANK_ID,
-  accountNo = ACCOUNT_NO,
-  accountName = ACCOUNT_NAME,
-}: Props) {
+export default function QRPayment({ orderCode, amount }: Props) {
   const [copied, setCopied] = useState<string | null>(null);
+  const { id: bankId, accountNo, accountName } = siteConfig.bank;
 
   const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(orderCode)}&accountName=${encodeURIComponent(accountName)}`;
 
