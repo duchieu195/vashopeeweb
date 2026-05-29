@@ -13,7 +13,7 @@ export default function OrderShow() {
   const { query } = useShow({ resource: 'orders' });
   const { mutate: updateOrder } = useUpdate();
   const order = query?.data?.data;
-  const isLoading = query?.isPending ?? query?.isLoading ?? false;
+  const isLoading = query?.isPending ?? false;
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
