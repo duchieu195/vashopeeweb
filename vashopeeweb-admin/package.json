@@ -13,6 +13,7 @@
     "@ant-design/icons": "^6.2.3",
     "@refinedev/antd": "^6.0.3",
     "@refinedev/core": "^5.0.12",
+    "@refinedev/react-router": "^2.0.4",
     "@refinedev/supabase": "^6.0.2",
     "@supabase/supabase-js": "^2.105.4",
     "antd": "^6.4.2",
