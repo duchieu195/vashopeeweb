@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useCart } from '../store/cartStore';
 import QRPayment from '../components/QRPayment';
+import { siteConfig } from '../config/siteConfig';
 
 const SHIPPING_KEY = 'vabeauty-shipping-info';
 const POLL_INTERVAL = 3000;
@@ -177,7 +178,7 @@ export default function CheckoutPage() {
         <div className="text-5xl mb-4">⏰</div>
         <h1 className="text-xl font-bold text-gray-800 mb-2">Hết thời gian thanh toán</h1>
         <p className="text-gray-500 text-sm mb-6">
-          Nếu bạn đã chuyển tiền, vui lòng liên hệ shop qua SĐT <strong>0909 123 456</strong> và cung cấp mã đơn hàng <strong>{orderCode}</strong>.
+          Nếu bạn đã chuyển tiền, vui lòng liên hệ shop qua SĐT <strong>{siteConfig.phone}</strong> và cung cấp mã đơn hàng <strong>{orderCode}</strong>.
         </p>
         <Link to="/" className="text-primary hover:underline text-sm">Về trang chủ</Link>
       </div>

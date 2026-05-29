@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { siteConfig } from '../config/siteConfig';
 
 export default function Footer() {
   return (
@@ -8,9 +9,7 @@ export default function Footer() {
           <h3 className="text-white font-bold text-lg mb-3">
             VA<span className="text-pink-400">Beauty</span>
           </h3>
-          <p className="text-sm leading-relaxed">
-            Cửa hàng mỹ phẩm chính hãng với đa dạng sản phẩm từ các thương hiệu nổi tiếng trong và ngoài nước.
-          </p>
+          <p className="text-sm leading-relaxed">{siteConfig.description}</p>
         </div>
 
         <div>
@@ -28,16 +27,16 @@ export default function Footer() {
         <div>
           <h4 className="text-white font-semibold mb-3">Liên Hệ</h4>
           <ul className="space-y-2 text-sm">
-            <li>📍 123 Đường Nguyễn Huệ, Q.1, TP.HCM</li>
-            <li>📞 0909 123 456</li>
-            <li>✉️ vabeauty@gmail.com</li>
-            <li>🕐 8:00 - 22:00 (Thứ 2 - Chủ Nhật)</li>
+            <li>📍 {siteConfig.address}</li>
+            <li>📞 {siteConfig.phone}</li>
+            <li>✉️ {siteConfig.email}</li>
+            <li>🕐 {siteConfig.hours}</li>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-gray-700 text-center py-4 text-xs text-gray-500">
-        © 2024 VABeauty. Tất cả quyền được bảo lưu.
+        {siteConfig.copyright}
       </div>
     </footer>
   );
