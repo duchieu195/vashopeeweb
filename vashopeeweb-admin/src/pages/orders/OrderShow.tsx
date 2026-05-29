@@ -1,6 +1,6 @@
 import { Show } from '@refinedev/antd';
 import { useShow, useUpdate } from '@refinedev/core';
-import { Descriptions, Tag, Select, Table, Image, Divider } from 'antd';
+import { Descriptions, Tag, Select, Table, Image, Divider, Spin, Alert } from 'antd';
 import { useEffect, useState } from 'react';
 import { supabaseClient } from '../../lib/supabase';
 
@@ -13,6 +13,7 @@ export default function OrderShow() {
   const { query } = useShow({ resource: 'orders' });
   const { mutate: updateOrder } = useUpdate();
   const order = query?.data?.data;
+  const isLoading = query?.isPending ?? query?.isLoading ?? false;
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
@@ -44,48 +45,60 @@ export default function OrderShow() {
       ),
     },
     { title: 'Số lượng', dataIndex: 'quantity' },
-    { title: 'Đơn giá', dataIndex: 'price_at_purchase', render: (v: number) => `${v.toLocaleString('vi-VN')}₫` },
-    { title: 'Thành tiền', render: (_: unknown, r: Record<string, unknown>) => `${((r.quantity as number) * (r.price_at_purchase as number)).toLocaleString('vi-VN')}₫` },
+    { title: 'Đơn giá', dataIndex: 'price_at_purchase', render: (v: number) => `${(v ?? 0).toLocaleString('vi-VN')}₫` },
+    { title: 'Thành tiền', render: (_: unknown, r: Record<string, unknown>) => `${(((r.quantity as number) ?? 0) * ((r.price_at_purchase as number) ?? 0)).toLocaleString('vi-VN')}₫` },
   ];
 
-  if (query?.isLoading) return <Show><div style={{ padding: 40, textAlign: 'center' }}>Đang tải...</div></Show>;
-  if (query?.isError || !order) return <Show><div style={{ padding: 40, textAlign: 'center', color: 'red' }}>Không tải được đơn hàng. Lỗi: {String(query?.error ?? 'order is null')}</div></Show>;
+  const renderContent = () => {
+    if (isLoading) {
+      return <div style={{ padding: 40, textAlign: 'center' }}><Spin size="large" /></div>;
+    }
+    if (query?.isError) {
+      return <Alert type="error" message={`Lỗi tải đơn hàng: ${String(query.error)}`} style={{ margin: 16 }} />;
+    }
+    if (!order) {
+      return <Alert type="warning" message="Không tìm thấy đơn hàng" style={{ margin: 16 }} />;
+    }
+    return (
+      <>
+        <Descriptions bordered column={2} size="small">
+          <Descriptions.Item label="Mã đơn hàng">{order.payment_code as string}</Descriptions.Item>
+          <Descriptions.Item label="Trạng thái">
+            <Select
+              value={order.status as string}
+              onChange={handleStatusChange}
+              style={{ width: 180 }}
+              options={Object.entries(STATUS_LABEL).map(([v, l]) => ({ value: v, label: l }))}
+            />
+          </Descriptions.Item>
+          <Descriptions.Item label="Khách hàng">{order.customer_name as string}</Descriptions.Item>
+          <Descriptions.Item label="Số điện thoại">{order.customer_phone as string}</Descriptions.Item>
+          <Descriptions.Item label="Email">{order.customer_email as string}</Descriptions.Item>
+          <Descriptions.Item label="Ngày đặt">{String(order.created_at ?? '').slice(0, 16).replace('T', ' ')}</Descriptions.Item>
+          <Descriptions.Item label="Địa chỉ giao hàng" span={2}>{order.shipping_address as string}</Descriptions.Item>
+          {order.notes && <Descriptions.Item label="Ghi chú" span={2}>{order.notes as string}</Descriptions.Item>}
+        </Descriptions>
+
+        <Divider>Sản phẩm trong đơn</Divider>
+        <Table dataSource={items} columns={itemColumns} rowKey="id" pagination={false} size="small"
+          summary={() => (
+            <Table.Summary.Row>
+              <Table.Summary.Cell index={0} colSpan={4} align="right"><strong>Tổng cộng:</strong></Table.Summary.Cell>
+              <Table.Summary.Cell index={1}>
+                <Tag color="pink" style={{ fontSize: 14 }}>
+                  {((order.total_amount as number) ?? 0).toLocaleString('vi-VN')}₫
+                </Tag>
+              </Table.Summary.Cell>
+            </Table.Summary.Row>
+          )}
+        />
+      </>
+    );
+  };
 
   return (
-    <Show>
-      <>
-          <Descriptions bordered column={2} size="small">
-            <Descriptions.Item label="Mã đơn hàng">{order.payment_code as string}</Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
-              <Select
-                value={order.status as string}
-                onChange={handleStatusChange}
-                style={{ width: 180 }}
-                options={Object.entries(STATUS_LABEL).map(([v, l]) => ({ value: v, label: l }))}
-              />
-            </Descriptions.Item>
-            <Descriptions.Item label="Khách hàng">{order.customer_name as string}</Descriptions.Item>
-            <Descriptions.Item label="Số điện thoại">{order.customer_phone as string}</Descriptions.Item>
-            <Descriptions.Item label="Email">{order.customer_email as string}</Descriptions.Item>
-            <Descriptions.Item label="Ngày đặt">{(order.created_at as string)?.slice(0, 16).replace('T', ' ')}</Descriptions.Item>
-            <Descriptions.Item label="Địa chỉ giao hàng" span={2}>{order.shipping_address as string}</Descriptions.Item>
-            {order.notes && <Descriptions.Item label="Ghi chú" span={2}>{order.notes as string}</Descriptions.Item>}
-          </Descriptions>
-
-          <Divider>Sản phẩm trong đơn</Divider>
-          <Table dataSource={items} columns={itemColumns} rowKey="id" pagination={false} size="small"
-            summary={() => (
-              <Table.Summary.Row>
-                <Table.Summary.Cell index={0} colSpan={4} align="right"><strong>Tổng cộng:</strong></Table.Summary.Cell>
-                <Table.Summary.Cell index={1}>
-                  <Tag color="pink" style={{ fontSize: 14 }}>
-                    {(order.total_amount as number).toLocaleString('vi-VN')}₫
-                  </Tag>
-                </Table.Summary.Cell>
-              </Table.Summary.Row>
-            )}
-          />
-        </>
+    <Show isLoading={isLoading}>
+      {renderContent()}
     </Show>
   );
 }
