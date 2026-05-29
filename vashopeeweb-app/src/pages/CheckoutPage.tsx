@@ -13,7 +13,12 @@ interface ShippingInfo {
   name: string;
   phone: string;
   address: string;
-  notes: string;
+}
+
+interface CouponState {
+  code: string;
+  discount: number;
+  status: 'idle' | 'checking' | 'valid' | 'invalid';
 }
 
 function generateOrderCode(): string {
@@ -38,11 +43,14 @@ export default function CheckoutPage() {
   const [form, setForm] = useState<ShippingInfo>(() => {
     try {
       const saved = localStorage.getItem(SHIPPING_KEY);
-      return saved ? JSON.parse(saved) : { name: '', phone: '', address: '', notes: '' };
+      return saved ? JSON.parse(saved) : { name: '', phone: '', address: '' };
     } catch {
-      return { name: '', phone: '', address: '', notes: '' };
+      return { name: '', phone: '', address: '' };
     }
   });
+
+  const [coupon, setCoupon] = useState<CouponState>({ code: '', discount: 0, status: 'idle' });
+  const [couponInput, setCouponInput] = useState('');
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -67,6 +75,26 @@ export default function CheckoutPage() {
     return Object.keys(errs).length === 0;
   };
 
+  const applyCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCoupon({ code: '', discount: 0, status: 'checking' });
+    const { data } = await supabase
+      .from('coupons')
+      .select('code, discount')
+      .eq('code', code)
+      .eq('is_active', true)
+      .single();
+    if (data) {
+      setCoupon({ code: data.code, discount: data.discount, status: 'valid' });
+    } else {
+      setCoupon({ code: '', discount: 0, status: 'invalid' });
+    }
+  };
+
+  const discountAmount = coupon.status === 'valid' ? Math.round(total * coupon.discount / 100) : 0;
+  const finalTotal = total - discountAmount;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -78,8 +106,9 @@ export default function CheckoutPage() {
       customer_name: form.name,
       customer_phone: form.phone,
       shipping_address: form.address,
-      notes: form.notes || null,
-      total_amount: total,
+      total_amount: finalTotal,
+      coupon_code: coupon.status === 'valid' ? coupon.code : null,
+      discount_amount: discountAmount > 0 ? discountAmount : null,
       status: 'pending',
     });
 
@@ -107,7 +136,7 @@ export default function CheckoutPage() {
     }
 
     // Save shipping info for next time
-    localStorage.setItem(SHIPPING_KEY, JSON.stringify({ ...form, notes: '' }));
+    localStorage.setItem(SHIPPING_KEY, JSON.stringify(form));
 
     setOrderCode(code);
     setStep('qr');
@@ -212,14 +241,34 @@ export default function CheckoutPage() {
                 ))}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú</label>
-                  <textarea
-                    value={form.notes}
-                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                    placeholder="Ghi chú cho đơn hàng (không bắt buộc)"
-                    rows={2}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-primary transition-colors resize-none"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mã Giảm Giá</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase());
+                        if (coupon.status !== 'idle') setCoupon({ code: '', discount: 0, status: 'idle' });
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), applyCoupon())}
+                      placeholder="Nhập mã giảm giá"
+                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm outline-none focus:border-primary transition-colors uppercase"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyCoupon}
+                      disabled={coupon.status === 'checking' || !couponInput.trim()}
+                      className="px-4 py-2 border border-primary text-primary text-sm rounded hover:bg-primary hover:text-white transition-colors disabled:opacity-40"
+                    >
+                      {coupon.status === 'checking' ? '...' : 'Áp dụng'}
+                    </button>
+                  </div>
+                  {coupon.status === 'valid' && (
+                    <p className="text-green-600 text-xs mt-1">✓ Mã <strong>{coupon.code}</strong> — giảm {coupon.discount}%</p>
+                  )}
+                  {coupon.status === 'invalid' && (
+                    <p className="text-red-500 text-xs mt-1">Mã không hợp lệ hoặc đã hết hạn</p>
+                  )}
                 </div>
 
                 <button
@@ -238,7 +287,7 @@ export default function CheckoutPage() {
                   {formatTime(timeLeft)}
                 </span>
               </div>
-              <QRPayment orderCode={orderCode} amount={total} />
+              <QRPayment orderCode={orderCode} amount={finalTotal} />
               <p className="text-xs text-gray-400 text-center">
                 Đang chờ xác nhận thanh toán...
               </p>
@@ -266,9 +315,21 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
-          <div className="border-t pt-3 flex justify-between font-bold text-gray-800">
-            <span>Tổng cộng</span>
-            <span className="text-primary text-lg">{total.toLocaleString('vi-VN')}₫</span>
+          <div className="border-t pt-3 space-y-1">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Tạm tính</span>
+              <span>{total.toLocaleString('vi-VN')}₫</span>
+            </div>
+            {discountAmount > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span>Giảm giá ({coupon.code} -{coupon.discount}%)</span>
+                <span>-{discountAmount.toLocaleString('vi-VN')}₫</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-gray-800 pt-1 border-t">
+              <span>Thanh toán</span>
+              <span className="text-primary text-lg">{finalTotal.toLocaleString('vi-VN')}₫</span>
+            </div>
           </div>
         </div>
       </div>

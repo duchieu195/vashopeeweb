@@ -9,6 +9,7 @@ import {
   ShoppingOutlined,
   TagsOutlined,
   OrderedListOutlined,
+  PercentageOutlined,
 } from '@ant-design/icons';
 import '@refinedev/antd/dist/reset.css';
 
@@ -23,6 +24,8 @@ import OrderShow from './pages/orders/OrderShow';
 import CategoryList from './pages/categories/CategoryList';
 import CategoryCreate from './pages/categories/CategoryCreate';
 import CategoryEdit from './pages/categories/CategoryEdit';
+import CouponList from './pages/coupons/CouponList';
+import CouponCreate from './pages/coupons/CouponCreate';
 
 export default function App() {
   return (
@@ -70,6 +73,12 @@ export default function App() {
                 edit: '/categories/edit/:id',
                 meta: { label: 'Danh Mục', icon: <TagsOutlined /> },
               },
+              {
+                name: 'coupons',
+                list: '/coupons',
+                create: '/coupons/create',
+                meta: { label: 'Mã Giảm Giá', icon: <PercentageOutlined /> },
+              },
             ]}
             options={{ syncWithLocation: true, warnWhenUnsavedChanges: true }}
           >
@@ -93,6 +102,8 @@ export default function App() {
                 <Route path="/categories" element={<CategoryList />} />
                 <Route path="/categories/create" element={<CategoryCreate />} />
                 <Route path="/categories/edit/:id" element={<CategoryEdit />} />
+                <Route path="/coupons" element={<CouponList />} />
+                <Route path="/coupons/create" element={<CouponCreate />} />
               </Route>
               <Route
                 path="/login"

@@ -10,6 +10,8 @@ interface OrderRecord {
   shipping_address: string;
   notes: string | null;
   total_amount: number;
+  coupon_code: string | null;
+  discount_amount: number | null;
   status: string;
 }
 
@@ -78,7 +80,10 @@ Deno.serve(async (req: Request) => {
     ``,
     itemLines,
     ``,
-    `💰 *Tổng: ${order.total_amount.toLocaleString('vi-VN')}₫*`,
+    order.coupon_code && order.discount_amount
+      ? `🏷 Mã giảm: ${order.coupon_code} (−${order.discount_amount.toLocaleString('vi-VN')}₫)`
+      : null,
+    `💰 *Thanh toán: ${order.total_amount.toLocaleString('vi-VN')}₫*`,
   ].filter((l) => l !== null).join('\n');
 
   const payload = {
