@@ -48,10 +48,12 @@ export default function OrderShow() {
     { title: 'Thành tiền', render: (_: unknown, r: Record<string, unknown>) => `${((r.quantity as number) * (r.price_at_purchase as number)).toLocaleString('vi-VN')}₫` },
   ];
 
+  if (query?.isLoading) return <Show><div style={{ padding: 40, textAlign: 'center' }}>Đang tải...</div></Show>;
+  if (query?.isError || !order) return <Show><div style={{ padding: 40, textAlign: 'center', color: 'red' }}>Không tải được đơn hàng. Lỗi: {String(query?.error ?? 'order is null')}</div></Show>;
+
   return (
     <Show>
-      {order && (
-        <>
+      <>
           <Descriptions bordered column={2} size="small">
             <Descriptions.Item label="Mã đơn hàng">{order.payment_code as string}</Descriptions.Item>
             <Descriptions.Item label="Trạng thái">
@@ -84,7 +86,6 @@ export default function OrderShow() {
             )}
           />
         </>
-      )}
     </Show>
   );
 }
