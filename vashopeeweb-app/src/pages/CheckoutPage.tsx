@@ -8,6 +8,7 @@ import { siteConfig } from '../config/siteConfig';
 const SHIPPING_KEY = 'vabeauty-shipping-info';
 const POLL_INTERVAL = 3000;
 const TIMEOUT_MS = 15 * 60 * 1000;
+const SHIPPING_FEE = 15000;
 
 interface ShippingInfo {
   name: string;
@@ -93,7 +94,7 @@ export default function CheckoutPage() {
   };
 
   const discountAmount = coupon.status === 'valid' ? Math.round(total * coupon.discount / 100) : 0;
-  const finalTotal = total - discountAmount;
+  const finalTotal = total - discountAmount + SHIPPING_FEE;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -319,6 +320,10 @@ export default function CheckoutPage() {
             <div className="flex justify-between text-sm text-gray-600">
               <span>Tạm tính</span>
               <span>{total.toLocaleString('vi-VN')}₫</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Phí vận chuyển</span>
+              <span>{SHIPPING_FEE.toLocaleString('vi-VN')}₫</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
