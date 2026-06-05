@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../store/cartStore';
 import { useCategories } from '../hooks/useCategories';
+import Logo from '../assets/logo.svg';
 
 export default function Header() {
   const [query, setQuery] = useState('');
@@ -23,9 +24,7 @@ export default function Header() {
         {/* Row 1: logo + cart (mobile) | logo + search + cart (desktop) */}
         <div className="flex items-center gap-3">
           <Link to="/" className="flex-shrink-0">
-            <span className="text-white font-bold text-xl md:text-2xl tracking-tight">
-              VA<span className="text-accent">Beauty</span>
-            </span>
+            <img src={Logo} alt="VAbeauty" className="h-8 md:h-10 w-auto brightness-0 invert" />
           </Link>
 
           {/* Search — desktop only in row 1 */}

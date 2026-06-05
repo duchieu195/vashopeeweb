@@ -1,13 +1,12 @@
 import { siteConfig } from '../config/siteConfig';
+import Logo from '../assets/logo.svg';
 
 export default function Footer() {
   return (
     <footer className="bg-gray-800 text-gray-300 mt-10">
       <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
         <div>
-          <h3 className="text-white font-bold text-lg mb-3">
-            VA<span className="text-pink-400">Beauty</span>
-          </h3>
+          <img src={Logo} alt="VAbeauty" className="h-8 w-auto brightness-0 invert mb-3" />
           <p className="text-sm leading-relaxed">{siteConfig.description}</p>
         </div>
 
