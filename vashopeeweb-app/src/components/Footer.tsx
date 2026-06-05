@@ -12,7 +12,7 @@ export default function Footer() {
         </div>
 
         <div>
-          <h4 className="text-white font-semibold mb-3">Kết Nối Với Chúng Tôi</h4>
+          <h4 className="text-white font-semibold mb-3">Kết Nối Với VA</h4>
           <ul className="space-y-3 text-sm">
             <li>
               <a href="https://zalo.me/0941244190" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-pink-400 transition-colors">
