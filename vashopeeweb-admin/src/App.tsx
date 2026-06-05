@@ -10,6 +10,7 @@ import {
   TagsOutlined,
   OrderedListOutlined,
   PercentageOutlined,
+  PictureOutlined,
 } from '@ant-design/icons';
 import '@refinedev/antd/dist/reset.css';
 
@@ -26,6 +27,9 @@ import CategoryCreate from './pages/categories/CategoryCreate';
 import CategoryEdit from './pages/categories/CategoryEdit';
 import CouponList from './pages/coupons/CouponList';
 import CouponCreate from './pages/coupons/CouponCreate';
+import BannerList from './pages/banners/BannerList';
+import BannerCreate from './pages/banners/BannerCreate';
+import BannerEdit from './pages/banners/BannerEdit';
 
 export default function App() {
   return (
@@ -79,6 +83,13 @@ export default function App() {
                 create: '/coupons/create',
                 meta: { label: 'Mã Giảm Giá', icon: <PercentageOutlined /> },
               },
+              {
+                name: 'banners',
+                list: '/banners',
+                create: '/banners/create',
+                edit: '/banners/edit/:id',
+                meta: { label: 'Banner', icon: <PictureOutlined /> },
+              },
             ]}
             options={{ syncWithLocation: true, warnWhenUnsavedChanges: true }}
           >
@@ -104,6 +115,9 @@ export default function App() {
                 <Route path="/categories/edit/:id" element={<CategoryEdit />} />
                 <Route path="/coupons" element={<CouponList />} />
                 <Route path="/coupons/create" element={<CouponCreate />} />
+                <Route path="/banners" element={<BannerList />} />
+                <Route path="/banners/create" element={<BannerCreate />} />
+                <Route path="/banners/edit/:id" element={<BannerEdit />} />
               </Route>
               <Route
                 path="/login"
